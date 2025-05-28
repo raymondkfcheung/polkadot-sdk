@@ -1,0 +1,10 @@
+title: Test 3
+doc:
+- audience: Runtime Dev
+  description: Test 3 is allowed for backporting.
+crates:
+- name: test-example-a
+  bump: patch
+  validate: true
+- name: test-example-b
+  bump: none

@@ -1,0 +1,12 @@
+title: Test 2
+doc:
+- audience: Runtime Dev
+  description: Test 2 fails backporting.
+crates:
+- name: test-example-a
+  bump: major
+- name: test-example-b
+  bump: patch
+  validate: false
+- name: test-example-c
+  bump: major
