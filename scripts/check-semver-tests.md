@@ -1,7 +1,7 @@
 # Test Summary: `check-semver` Backport Script
 
 Tests validate the script's behaviour across different PR scenarios and base branches, specifically checking SemVer
-compliance for backports.
+compliance backport-specific enforcements.
 
 * [`check-semver-test.sh`](check-semver-test.sh)
 * [PR #42 - Test 1](../prdoc/pr_42.prdoc)
@@ -20,12 +20,12 @@ compliance for backports.
 
 ## Tests on `dev` (Non-Stable Branch - SemVer Check Skipped)
 
-| PR # | Description                        | Script Output Summary                                                       | Result                                                                          |
-|:-----|:-----------------------------------|:----------------------------------------------------------------------------|:--------------------------------------------------------------------------------|
-| 42   | Test 1 is allowed for backporting. | `Branch 'dev' is not a stable branch. Skipping SemVer check for backports.` | **Ignored** - Correctly skipped the SemVer check as it's not a `stable` branch. |
-| 43   | Test 2 fails backporting.          | `Branch 'dev' is not a stable branch. Skipping SemVer check for backports.` | **Ignored** - Correctly skipped the SemVer check as it's not a `stable` branch. |
-| 44   | Test 3 is allowed for backporting. | `Branch 'dev' is not a stable branch. Skipping SemVer check for backports.` | **Ignored** - Correctly skipped the SemVer check as it's not a `stable` branch. |
-| 45   | Test 4 is allowed for backporting. | `Branch 'dev' is not a stable branch. Skipping SemVer check for backports.` | **Ignored** - Correctly skipped the SemVer check as it's not a `stable` branch. |
+| PR # | Description                        | Script Output Summary                                                                        | Result                                                                          |
+|:-----|:-----------------------------------|:---------------------------------------------------------------------------------------------|:--------------------------------------------------------------------------------|
+| 42   | Test 1 is allowed for backporting. | `Branch 'dev' is not a stable branch. Skipping SemVer check backport-specific enforcements.` | **Ignored** - Correctly skipped the SemVer check as it's not a `stable` branch. |
+| 43   | Test 2 fails backporting.          | `Branch 'dev' is not a stable branch. Skipping SemVer check backport-specific enforcements.` | **Ignored** - Correctly skipped the SemVer check as it's not a `stable` branch. |
+| 44   | Test 3 is allowed for backporting. | `Branch 'dev' is not a stable branch. Skipping SemVer check backport-specific enforcements.` | **Ignored** - Correctly skipped the SemVer check as it's not a `stable` branch. |
+| 45   | Test 4 is allowed for backporting. | `Branch 'dev' is not a stable branch. Skipping SemVer check backport-specific enforcements.` | **Ignored** - Correctly skipped the SemVer check as it's not a `stable` branch. |
 
 ## Key Takeaways
 

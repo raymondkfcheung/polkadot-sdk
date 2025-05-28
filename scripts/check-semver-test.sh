@@ -9,7 +9,7 @@ grep description "prdoc/pr_$PR.prdoc"
 
           # Only enforce SemVer restrictions for backports targeting stable branches
           if [[ "$BASE_BRANCH" != stable* ]]; then
-              echo "ℹ️ Branch '$BASE_BRANCH' is not a stable branch. Skipping SemVer check for backports."
+              echo "ℹ️ Branch '$BASE_BRANCH' is not a stable branch. Skipping SemVer backport-specific enforcements."
               exit 0
           fi
 
