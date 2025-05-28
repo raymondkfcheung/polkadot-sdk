@@ -1,4 +1,4 @@
-# Test Summary: `check-semver-test.sh` Script
+# Test Summary: `check-semver` Backport Script
 
 Tests validate the script's behaviour across different PR scenarios and base branches, specifically checking SemVer
 compliance for backports.
