@@ -137,7 +137,7 @@ where
 		dmp::Pallet::<T>::queue_downward_message(&config, para, blob)
 			.map(|()| hash)
 			.map_err(|error| {
-				tracing::debug!(
+				log::debug!(
 					target: "xcm::xcm_sender::deliver",
 					"Failed to place into DMP queue: error: {error:?}, id: {hash:?}",
 				);
@@ -170,7 +170,7 @@ impl<T: dmp::Config, W, P> InspectMessageQueues for ChildParachainRouter<T, W, P
 							&mut &downward_message.msg[..],
 						)
 						.unwrap();
-						tracing::trace!(
+						log::trace!(
 							target: "xcm::DownwardMessageQueues::get_messages",
 							"Message: {:?}, sent at: {:?}", message, downward_message.sent_at
 						);
