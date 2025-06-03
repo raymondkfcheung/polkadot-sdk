@@ -351,9 +351,8 @@ pub mod pallet {
 				let mut hash = message.using_encoded(sp_io::hashing::blake2_256);
 				let message = (*message).try_into().map_err(|()| {
 					tracing::debug!(
-						target: "xcm::pallet_xcm::execute",
-						id=?hash,
-						 "Failed to convert VersionedXcm to Xcm",
+						target: "xcm::pallet_xcm::execute", id=?hash,
+						"Failed to convert VersionedXcm to Xcm",
 					);
 					Error::<T>::BadVersion
 				})?;
@@ -370,7 +369,8 @@ pub mod pallet {
 			})()
 			.map_err(|e: DispatchError| {
 				tracing::debug!(
-					target: "xcm::pallet_xcm::execute", ?e, "Failed XCM pre-execution validation or filter",
+					target: "xcm::pallet_xcm::execute", error=?e,
+					"Failed XCM pre-execution validation or filter",
 				);
 				e.with_weight(<Self::WeightInfo as ExecuteControllerWeightInfo>::execute())
 			})?;
@@ -1254,15 +1254,14 @@ pub mod pallet {
 			T::AdminOrigin::ensure_origin(origin)?;
 			let location: Location = (*location).try_into().map_err(|()| {
 				tracing::debug!(
-				   target: "xcm::pallet_xcm::force_subscribe_version_notify",
-				   "Failed to convert VersionedLocation for subscription target"
+					target: "xcm::pallet_xcm::force_subscribe_version_notify",
+					"Failed to convert VersionedLocation for subscription target"
 				);
 				Error::<T>::BadLocation
 			})?;
 			Self::request_version_notify(location).map_err(|e| {
 				tracing::debug!(
-					target: "xcm::pallet_xcm::force_subscribe_version_notify",
-					error=?e,
+					target: "xcm::pallet_xcm::force_subscribe_version_notify", error=?e,
 					"Failed to subscribe for version notifications for location"
 				);
 				match e {
@@ -1294,7 +1293,7 @@ pub mod pallet {
 			})?;
 			Self::unrequest_version_notify(location).map_err(|e| {
 				tracing::debug!(
-					target: "xcm::pallet_xcm::force_unsubscribe_version_notify",
+					target: "xcm::pallet_xcm::force_unsubscribe_version_notify", error=?e,
 					"Failed to unsubscribe from version notifications for location"
 				);
 				match e {
@@ -1529,7 +1528,7 @@ pub mod pallet {
 				DepositAsset { assets: AllCounted(number_of_assets).into(), beneficiary },
 			]);
 			let weight = T::Weigher::weight(&mut message, Weight::MAX).map_err(|error| {
-				tracing::debug!(target: "xcm::pallet_xcm::claim_assets", ?error, "Failed to calculate XCM weight");
+				tracing::debug!(target: "xcm::pallet_xcm::claim_assets", ?error, "Failed to calculate weight");
 				Error::<T>::UnweighableMessage
 			})?;
 			let mut hash = message.using_encoded(sp_io::hashing::blake2_256);
@@ -1734,8 +1733,7 @@ pub mod pallet {
 				let mut aliasers = BoundedVec::<OriginAliaser, MaxAuthorizedAliases>::new();
 				aliasers.try_push(aliaser).map_err(|error| {
 					tracing::debug!(
-						target: "xcm::pallet_xcm::add_authorized_alias",
-						?error,
+						target: "xcm::pallet_xcm::add_authorized_alias", ?error,
 						"Failed to add first aliaser to new entry",
 					);
 					Error::<T>::TooManyAuthorizedAliases
@@ -1917,8 +1915,7 @@ impl<T: Config> QueryHandler for Pallet<T> {
 				},
 				Err(_) => {
 					tracing::debug!(
-						target: "xcm::pallet_xcm::take_response",
-						?query_id,
+						target: "xcm::pallet_xcm::take_response", ?query_id,
 						"Failed to convert VersionedResponse to Response for query",
 					);
 					QueryResponseStatus::UnexpectedVersion
@@ -1927,16 +1924,14 @@ impl<T: Config> QueryHandler for Pallet<T> {
 			Some(QueryStatus::Pending { timeout, .. }) => QueryResponseStatus::Pending { timeout },
 			Some(_) => {
 				tracing::debug!(
-					target: "xcm::pallet_xcm::take_response",
-					?query_id,
+					target: "xcm::pallet_xcm::take_response", ?query_id,
 					"Unexpected QueryStatus variant for query",
 				);
 				QueryResponseStatus::UnexpectedVersion
 			},
 			None => {
 				tracing::debug!(
-					target: "xcm::pallet_xcm::take_response",
-					?query_id,
+					target: "xcm::pallet_xcm::take_response", ?query_id,
 					"Query ID not found`",
 				);
 				QueryResponseStatus::NotFound
@@ -3431,7 +3426,7 @@ impl<T: Config> Pallet<T> {
 		let destination = T::UniversalLocation::get().invert_target(&responder).map_err(|()| {
 			tracing::debug!(
 				target: "xcm::pallet_xcm::report_outcome_notify",
-			"Failed to invert responder location to universal location",
+				"Failed to invert responder location to universal location",
 			);
 			XcmError::LocationNotInvertible
 		})?;
@@ -3485,7 +3480,7 @@ impl<T: Config> Pallet<T> {
 		T::XcmExecutor::charge_fees(location.clone(), assets.clone()).map_err(|error| {
 			tracing::debug!(
 				target: "xcm::pallet_xcm::charge_fees", ?error,
-				 "Failed to charge fees for location with assets",
+				"Failed to charge fees for location with assets",
 			);
 			Error::<T>::FeesNotMet
 		})?;
@@ -3595,10 +3590,8 @@ impl<T: Config> xcm_executor::traits::Enact for LockTicket<T> {
 				locks.try_push((self.amount, self.unlocker.into())).map_err(
 					|(balance, location)| {
 						tracing::debug!(
-							target: "xcm::pallet_xcm::enact",
-											?balance,
-											?location,
-							 "Failed to lock fungibles",
+							target: "xcm::pallet_xcm::enact", ?balance, ?location,
+							"Failed to lock fungibles",
 						);
 						UnexpectedState
 					},
