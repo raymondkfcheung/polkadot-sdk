@@ -44,7 +44,7 @@ pub mod v1 {
 				// Return the weight consumed by the migration.
 				T::DbWeight::get().reads_writes(1, 3)
 			} else {
-				log::info!(target: LOG_TARGET, "MigrateToV1 should be removed");
+				tracing::info!(target: LOG_TARGET, "MigrateToV1 should be removed");
 				T::DbWeight::get().reads(1)
 			}
 		}

@@ -4635,7 +4635,6 @@ dependencies = [
  "frame-benchmarking",
  "frame-support",
  "frame-system",
- "log",
  "pallet-balances",
  "pallet-message-queue",
  "parity-scale-codec",
@@ -4648,6 +4647,7 @@ dependencies = [
  "staging-xcm",
  "staging-xcm-builder",
  "staging-xcm-executor",
+ "tracing",
 ]
 
 [[package]]
@@ -13870,7 +13870,6 @@ dependencies = [
  "cumulus-primitives-utility",
  "frame-support",
  "frame-system",
- "log",
  "pallet-asset-tx-payment",
  "pallet-assets",
  "pallet-authorship",
@@ -13888,6 +13887,7 @@ dependencies = [
  "staging-parachain-info",
  "staging-xcm",
  "staging-xcm-executor",
+ "tracing",
 ]
 
 [[package]]
@@ -15741,7 +15741,6 @@ dependencies = [
  "hex-literal",
  "impl-trait-for-tuples",
  "libsecp256k1",
- "log",
  "pallet-asset-rate",
  "pallet-authorship",
  "pallet-babe",
@@ -15780,6 +15779,7 @@ dependencies = [
  "staging-xcm-builder",
  "staging-xcm-executor",
  "static_assertions",
+ "tracing",
 ]
 
 [[package]]

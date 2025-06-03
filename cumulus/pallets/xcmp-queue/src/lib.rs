@@ -275,7 +275,7 @@ pub mod pallet {
 			let mut meter = WeightMeter::with_limit(limit);
 
 			if meter.try_consume(Self::on_idle_weight()).is_err() {
-				log::debug!(
+				tracing::debug!(
 					"Not enough weight for on_idle. {} < {}",
 					Self::on_idle_weight(),
 					limit
@@ -513,7 +513,7 @@ impl<T: Config> Pallet<T> {
 			details
 		} else {
 			all_channels.try_push(OutboundChannelDetails::new(recipient)).map_err(|e| {
-				log::error!("Failed to activate HRMP channel: {:?}", e);
+				tracing::error!("Failed to activate HRMP channel: {:?}", e);
 				MessageSendError::TooManyChannels
 			})?;
 			all_channels
@@ -559,7 +559,7 @@ impl<T: Config> Pallet<T> {
 			let number_of_pages = (channel_details.last_index - channel_details.first_index) as u32;
 			let bounded_page =
 				BoundedVec::<u8, T::MaxPageSize>::try_from(new_page).map_err(|error| {
-					log::debug!(target: LOG_TARGET, "Failed to create bounded message page: {error:?}");
+					tracing::debug!(target: LOG_TARGET, "Failed to create bounded message page: {error:?}");
 					MessageSendError::TooBig
 				})?;
 			let bounded_page = WeakBoundedVec::force_from(bounded_page.into_inner(), None);
@@ -589,7 +589,7 @@ impl<T: Config> Pallet<T> {
 			details.signals_exist = true;
 		} else {
 			s.try_push(OutboundChannelDetails::new(dest).with_signals()).map_err(|error| {
-				log::debug!(target: LOG_TARGET, "Failed to activate XCMP channel: {error:?}");
+				tracing::debug!(target: LOG_TARGET, "Failed to activate XCMP channel: {error:?}");
 				Error::<T>::TooManyActiveOutboundChannels
 			})?;
 		}
@@ -598,7 +598,7 @@ impl<T: Config> Pallet<T> {
 			(XcmpMessageFormat::Signals, signal).encode(),
 		)
 		.map_err(|error| {
-			log::debug!(target: LOG_TARGET, "Failed to encode signal message: {error:?}");
+			tracing::debug!(target: LOG_TARGET, "Failed to encode signal message: {error:?}");
 			Error::<T>::TooBig
 		})?;
 		let page = WeakBoundedVec::force_from(page.into_inner(), None);
@@ -677,7 +677,7 @@ impl<T: Config> Pallet<T> {
 		);
 
 		if best_batch_footprint.msgs_count < xcms.len() {
-			log::error!(
+			tracing::error!(
 				"Out of weight: cannot enqueue entire XCMP messages batch; \
 				dropped some or all messages in batch. Used weight: {:?}",
 				meter.consumed_ratio()
@@ -709,12 +709,12 @@ impl<T: Config> Pallet<T> {
 
 		let xcm = VersionedXcm::<()>::decode_with_depth_limit(MAX_XCM_DECODE_DEPTH, data).map_err(
 			|error| {
-				log::debug!(target: LOG_TARGET, "Failed to decode XCM with depth limit: {error:?}");
+				tracing::debug!(target: LOG_TARGET, "Failed to decode XCM with depth limit: {error:?}");
 				()
 			},
 		)?;
 		Ok(Some(xcm.encode().try_into().map_err(|error| {
-			log::debug!(target: LOG_TARGET, "Failed to encode XCM after decoding: {error:?}");
+			tracing::debug!(target: LOG_TARGET, "Failed to encode XCM after decoding: {error:?}");
 			()
 		})?))
 	}
@@ -777,21 +777,21 @@ impl<T: Config> OnQueueChanged<ParaId> for Pallet<T> {
 
 		if suspended && fp.ready_pages <= resume_threshold {
 			if let Err(err) = Self::send_signal(para, ChannelSignal::Resume) {
-				log::error!("defensive: Could not send resumption signal to inbound channel of sibling {:?}: {:?}; channel remains suspended.", para, err);
+				tracing::error!("defensive: Could not send resumption signal to inbound channel of sibling {:?}: {:?}; channel remains suspended.", para, err);
 			} else {
 				suspended_channels.remove(&para);
 				<InboundXcmpSuspended<T>>::put(suspended_channels);
 			}
 		} else if !suspended && fp.ready_pages >= suspend_threshold {
-			log::warn!("XCMP queue for sibling {:?} is full; suspending channel.", para);
+			tracing::warn!("XCMP queue for sibling {:?} is full; suspending channel.", para);
 
 			if let Err(err) = Self::send_signal(para, ChannelSignal::Suspend) {
 				// It will retry if `drop_threshold` is not reached, but it could be too late.
-				log::error!(
+				tracing::error!(
 					"defensive: Could not send suspension signal; future messages may be dropped: {:?}", err
 				);
 			} else if let Err(err) = suspended_channels.try_insert(para) {
-				log::error!("Too many channels suspended; cannot suspend sibling {:?}: {:?}; further messages may be dropped.", para, err);
+				tracing::error!("Too many channels suspended; cannot suspend sibling {:?}: {:?}; further messages may be dropped.", para, err);
 			} else {
 				<InboundXcmpSuspended<T>>::put(suspended_channels);
 			}
@@ -992,7 +992,7 @@ impl<T: Config> XcmpMessageSource for Pallet<T> {
 			let max_total_size = match T::ChannelInfo::get_channel_info(para_id) {
 				Some(channel_info) => channel_info.max_total_size,
 				None => {
-					log::warn!("calling `get_channel_info` with no RelevantMessagingState?!");
+					tracing::warn!("calling `get_channel_info` with no RelevantMessagingState?!");
 					MAX_POSSIBLE_ALLOCATION // We use this as a fallback in case the messaging state is not present
 				},
 			};
@@ -1061,11 +1061,11 @@ impl<T: Config> SendXcm for Pallet<T> {
 				let id = ParaId::from(*id);
 				let price = T::PriceForSiblingDelivery::price_for_delivery(id, &xcm);
 				let versioned_xcm = T::VersionWrapper::wrap_version(&d, xcm).map_err(|()| {
-					log::debug!(target: LOG_TARGET, "Failed to wrap XCM with version for destination: {d:?}");
+					tracing::debug!(target: LOG_TARGET, "Failed to wrap XCM with version for destination: {d:?}");
 					SendError::DestinationUnsupported
 				})?;
 				versioned_xcm.check_is_decodable().map_err(|()| {
-					log::debug!(target: LOG_TARGET, "Failed to check XCM decodability: message too large or malformed");
+					tracing::debug!(target: LOG_TARGET, "Failed to check XCM decodability: message too large or malformed");
 					SendError::ExceedsMaxMessageSize
 				})?;
 
@@ -1074,7 +1074,7 @@ impl<T: Config> SendXcm for Pallet<T> {
 			_ => {
 				// Anything else is unhandled. This includes a message that is not meant for us.
 				// We need to make sure that dest/msg is not consumed here.
-				log::debug!(target: LOG_TARGET, "Failed to validate XCM destination: unexpected location {d:?}");
+				tracing::debug!(target: LOG_TARGET, "Failed to validate XCM destination: unexpected location {d:?}");
 				*dest = Some(d);
 				Err(SendError::NotApplicable)
 			},
@@ -1090,7 +1090,7 @@ impl<T: Config> SendXcm for Pallet<T> {
 				Ok(hash)
 			},
 			Err(e) => {
-				log::error!(target: LOG_TARGET, "Deliver error: {e:?}");
+				tracing::error!(target: LOG_TARGET, "Deliver error: {e:?}");
 				Err(SendError::Transport(e.into()))
 			},
 		}
