@@ -15934,6 +15934,7 @@ dependencies = [
  "hex-literal",
  "impl-trait-for-tuples",
  "libsecp256k1",
+ "log",
  "pallet-asset-rate",
  "pallet-authorship",
  "pallet-babe",
@@ -15972,7 +15973,6 @@ dependencies = [
  "staging-xcm-builder",
  "staging-xcm-executor",
  "static_assertions",
- "tracing",
 ]
 
 [[package]]
