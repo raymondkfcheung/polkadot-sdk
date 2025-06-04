@@ -75,8 +75,7 @@ where
 	) -> Result<(Self::Ticket, Assets), SendError> {
 		tracing::trace!(
 			target: LOG_TARGET,
-			?network, ?channel, ?universal_source, ?destination,
-			"Validate for network"
+			"Validate for network: {network:?}, channel: {channel:?}, universal_source: {universal_source:?}, destination: {destination:?}"
 		);
 
 		// `HaulBlobExporter` may consume the `universal_source` and `destination` arguments, so
@@ -92,8 +91,7 @@ where
 				Ok(dest_network) => {
 					tracing::trace!(
 						target: LOG_TARGET,
-						destination=?dest, ?dest_network, ?network,
-						"Destination is already universal, checking dest_network and network if matches: {:?}",
+						"Destination: {dest:?} is already universal, checking dest_network: {dest_network:?} and network: {network:?} if matches: {:?}",
 						dest_network == network
 					);
 					ensure!(dest_network == network, SendError::NotApplicable);
@@ -133,9 +131,9 @@ where
 		let bridge = Self::bridge(locations.bridge_id()).ok_or_else(|| {
 			tracing::error!(
 				target: LOG_TARGET,
-				bridge_origin_relative_location=?locations.bridge_origin_relative_location(),
-				bridge_destination_universal_location=?locations.bridge_destination_universal_location(),
-				"No opened bridge for requested",
+				"No opened bridge for requested bridge_origin_relative_location: {:?} and bridge_destination_universal_location: {:?}",
+				locations.bridge_origin_relative_location(),
+				locations.bridge_destination_universal_location(),
 			);
 			SendError::NotApplicable
 		})?;
@@ -164,8 +162,11 @@ where
 				};
 
 				tracing::error!(
-					target: LOG_TARGET, error=?e, bridge_id=?id, locations=?locations, lane_id=?bridge.lane_id,
-					"XCM message cannot be exported because of bridge error",
+					target: LOG_TARGET, error=?e,
+					"XCM message {:?} cannot be exported because of bridge error: on bridge {:?} and laneId: {:?}",
+					id,
+					locations,
+					bridge.lane_id,
 				);
 				SendError::Transport("BridgeValidateError")
 			})?;
@@ -180,8 +181,11 @@ where
 
 		tracing::info!(
 			target: LOG_TARGET,
-			?id, ?bridge_id, lane_id=?bridge.lane_id, nonce=?artifacts.nonce,
-			"XCM message has been enqueued",
+			"XCM message {:?} has been enqueued at bridge {:?} and lane_id: {:?} with nonce {}",
+			id,
+			bridge_id,
+			bridge.lane_id,
+			artifacts.nonce,
 		);
 
 		// maybe we need switch to congested state
@@ -227,8 +231,9 @@ impl<T: Config<I>, I: 'static> Pallet<T, I> {
 			Ok(bridge_origin_relative_location) => bridge_origin_relative_location,
 			Err(_) => {
 				tracing::debug!(
-					target: LOG_TARGET, ?bridge_id,
-					"Failed to convert the bridge to origin location {:?}",
+					target: LOG_TARGET,
+					"Failed to convert the bridge {:?} origin location {:?}",
+					bridge_id,
 					bridge.bridge_origin_relative_location,
 				);
 
@@ -240,15 +245,17 @@ impl<T: Config<I>, I: 'static> Pallet<T, I> {
 		match suspend_result {
 			Ok(_) => {
 				tracing::debug!(
-					target: LOG_TARGET, ?bridge_id,
-					"Suspended the bridge, originated by the {:?}",
+					target: LOG_TARGET,
+					"Suspended the bridge {:?}, originated by the {:?}",
+					bridge_id,
 					bridge.bridge_origin_relative_location,
 				);
 			},
 			Err(e) => {
 				tracing::debug!(
-					target: LOG_TARGET, error=?e, ?bridge_id,
-					"Failed to suspended the bridge, originated by the {:?}",
+					target: LOG_TARGET, error=?e,
+					"Failed to suspended the bridge {:?}, originated by the {:?}",
+					bridge_id,
 					bridge.bridge_origin_relative_location,
 				);
 
@@ -288,8 +295,10 @@ impl<T: Config<I>, I: 'static> Pallet<T, I> {
 			Ok(bridge_origin_relative_location) => bridge_origin_relative_location,
 			Err(e) => {
 				tracing::debug!(
-					target: LOG_TARGET, error=?e, ?bridge_id, ?lane_id,
-					"Failed to convert the bridge",
+					target: LOG_TARGET, error=?e,
+					"Failed to convert the bridge {:?} location for lane_id: {:?}",
+					bridge_id,
+					lane_id,
 				);
 
 				return
@@ -301,15 +310,19 @@ impl<T: Config<I>, I: 'static> Pallet<T, I> {
 		match resume_result {
 			Ok(_) => {
 				tracing::debug!(
-					target: LOG_TARGET, ?bridge_id, ?lane_id,
-					"Resumed the bridge, originated by the {:?}",
+					target: LOG_TARGET,
+					"Resumed the bridge {:?} and lane_id: {:?}, originated by the {:?}",
+					bridge_id,
+					lane_id,
 					bridge_origin_relative_location,
 				);
 			},
 			Err(e) => {
 				tracing::debug!(
-					target: LOG_TARGET, error=?e, ?bridge_id, ?lane_id,
-					"Failed to resume the bridge, originated by the {:?}",
+					target: LOG_TARGET, error=?e,
+					"Failed to resume the bridge {:?} and lane_id: {:?}, originated by the {:?}",
+					bridge_id,
+					lane_id,
 					bridge_origin_relative_location,
 				);
 

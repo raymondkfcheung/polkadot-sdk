@@ -1428,7 +1428,7 @@ impl<Call: Decode + GetDispatchInfo> TryFrom<NewInstruction<Call>> for Instructi
 			PayFees { .. } |
 			SetHints { .. } |
 			ExecuteWithOrigin { .. } => {
-				tracing::debug!(target: "xcm::versions::v5tov4", ?new_instruction, "Not supported by v4");
+				tracing::debug!(target: "xcm::versions::v5tov4", "`{new_instruction:?}` not supported by v4");
 				return Err(());
 			},
 		})

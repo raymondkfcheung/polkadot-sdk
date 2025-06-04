@@ -276,8 +276,10 @@ pub mod pallet {
 
 			if meter.try_consume(Self::on_idle_weight()).is_err() {
 				tracing::debug!(
-					target: LOG_TARGET, idle_weight=?Self::on_idle_weight(), ?limit,
-					"Not enough weight for on_idle.",
+					target: LOG_TARGET,
+					"Not enough weight for on_idle. {} < {}",
+					Self::on_idle_weight(),
+					limit
 				);
 				return meter.consumed()
 			}
@@ -677,9 +679,10 @@ impl<T: Config> Pallet<T> {
 
 		if best_batch_footprint.msgs_count < xcms.len() {
 			tracing::error!(
-				target: LOG_TARGET, used_weight=?meter.consumed_ratio(),
+				target: LOG_TARGET,
 				"Out of weight: cannot enqueue entire XCMP messages batch; \
-				dropped some or all messages in batch"
+				dropped some or all messages in batch. Used weight: {:?}",
+				meter.consumed_ratio()
 			);
 			return Err(());
 		}
@@ -777,15 +780,15 @@ impl<T: Config> OnQueueChanged<ParaId> for Pallet<T> {
 		if suspended && fp.ready_pages <= resume_threshold {
 			if let Err(err) = Self::send_signal(para, ChannelSignal::Resume) {
 				tracing::error!(
-					target: LOG_TARGET, error=?err, ?para,
-					"defensive: Could not send resumption signal to inbound channel of sibling; channel remains suspended."
+					target: LOG_TARGET, error=?err,
+					"defensive: Could not send resumption signal to inbound channel of sibling {:?}; channel remains suspended.", para
 				);
 			} else {
 				suspended_channels.remove(&para);
 				<InboundXcmpSuspended<T>>::put(suspended_channels);
 			}
 		} else if !suspended && fp.ready_pages >= suspend_threshold {
-			tracing::warn!(target: LOG_TARGET, ?para, "XCMP queue for sibling is full; suspending channel.");
+			tracing::warn!(target: LOG_TARGET, "XCMP queue for sibling {:?} is full; suspending channel.", para);
 
 			if let Err(err) = Self::send_signal(para, ChannelSignal::Suspend) {
 				// It will retry if `drop_threshold` is not reached, but it could be too late.
@@ -794,8 +797,9 @@ impl<T: Config> OnQueueChanged<ParaId> for Pallet<T> {
 					"defensive: Could not send suspension signal; future messages may be dropped"
 				);
 			} else if let Err(err) = suspended_channels.try_insert(para) {
-				tracing::error!(target: LOG_TARGET, error=?err, ?para,
-					"Too many channels suspended; cannot suspend sibling; further messages may be dropped."
+				tracing::error!(
+					target: LOG_TARGET, error=?err,
+					"Too many channels suspended; cannot suspend sibling {:?}; further messages may be dropped.", para
 				);
 			} else {
 				<InboundXcmpSuspended<T>>::put(suspended_channels);
@@ -1076,7 +1080,7 @@ impl<T: Config> SendXcm for Pallet<T> {
 			_ => {
 				// Anything else is unhandled. This includes a message that is not meant for us.
 				// We need to make sure that dest/msg is not consumed here.
-				tracing::debug!(target: LOG_TARGET, destination=?d, "Failed to validate XCM destination: unexpected location");
+				tracing::debug!(target: LOG_TARGET, "Failed to validate XCM destination: unexpected location {d:?}");
 				*dest = Some(d);
 				Err(SendError::NotApplicable)
 			},
