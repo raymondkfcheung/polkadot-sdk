@@ -794,7 +794,7 @@ impl<T: Config> OnQueueChanged<ParaId> for Pallet<T> {
 				// It will retry if `drop_threshold` is not reached, but it could be too late.
 				tracing::error!(
 					target: LOG_TARGET, error=?err,
-					"defensive: Could not send suspension signal; future messages may be dropped"
+					"defensive: Could not send suspension signal; future messages may be dropped."
 				);
 			} else if let Err(err) = suspended_channels.try_insert(para) {
 				tracing::error!(
