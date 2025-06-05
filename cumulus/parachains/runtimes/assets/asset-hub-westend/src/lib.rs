@@ -1280,12 +1280,12 @@ impl frame_support::traits::OnRuntimeUpgrade for DeleteUndecodableStorage {
 		// any for this account.
 		match AccountId::from_ss58check("5GCCJthVSwNXRpbeg44gysJUx9vzjdGdfWhioeM7gCg6VyXf") {
 			Ok(a) => {
-				tracing::info!(target: "runtime::asset-hub-westend", "Removing holds for account with bad hold");
+				tracing::info!(target: "bridges::on_runtime_upgrade", "Removing holds for account with bad hold");
 				pallet_balances::Holds::<Runtime, ()>::remove(a);
 				writes.saturating_inc();
 			},
 			Err(_) => {
-				tracing::error!(target: "runtime::asset-hub-westend", "CleanupUndecodableStorage: Somehow failed to convert valid SS58 address into an AccountId!");
+				tracing::error!(target: "bridges::on_runtime_upgrade", "CleanupUndecodableStorage: Somehow failed to convert valid SS58 address into an AccountId!");
 			},
 		};
 
@@ -1293,10 +1293,10 @@ impl frame_support::traits::OnRuntimeUpgrade for DeleteUndecodableStorage {
 		writes.saturating_inc();
 		match pallet_nfts::Pallet::<Runtime, ()>::do_burn(3, 1, |_| Ok(())) {
 			Ok(_) => {
-				tracing::info!(target: "runtime::asset-hub-westend", "Destroyed undecodable NFT item 1");
+				tracing::info!(target: "bridges::on_runtime_upgrade", "Destroyed undecodable NFT item 1");
 			},
 			Err(e) => {
-				tracing::error!(target: "runtime::asset-hub-westend", error=?e, "Failed to destroy undecodable NFT item");
+				tracing::error!(target: "bridges::on_runtime_upgrade", error=?e, "Failed to destroy undecodable NFT item");
 				return <Runtime as frame_system::Config>::DbWeight::get().reads_writes(0, writes);
 			},
 		}
@@ -1305,10 +1305,10 @@ impl frame_support::traits::OnRuntimeUpgrade for DeleteUndecodableStorage {
 		writes.saturating_inc();
 		match pallet_nfts::Pallet::<Runtime, ()>::do_burn(3, 2, |_| Ok(())) {
 			Ok(_) => {
-				tracing::info!(target: "runtime::asset-hub-westend", "Destroyed undecodable NFT item 2");
+				tracing::info!(target: "bridges::on_runtime_upgrade", "Destroyed undecodable NFT item 2");
 			},
 			Err(e) => {
-				tracing::error!(target: "runtime::asset-hub-westend", error=?e, "Failed to destroy undecodable NFT item");
+				tracing::error!(target: "bridges::on_runtime_upgrade", error=?e, "Failed to destroy undecodable NFT item");
 				return <Runtime as frame_system::Config>::DbWeight::get().reads_writes(0, writes);
 			},
 		}
@@ -1321,10 +1321,10 @@ impl frame_support::traits::OnRuntimeUpgrade for DeleteUndecodableStorage {
 			None,
 		) {
 			Ok(_) => {
-				tracing::info!(target: "runtime::asset-hub-westend", "Destroyed undecodable NFT collection");
+				tracing::info!(target: "bridges::on_runtime_upgrade", "Destroyed undecodable NFT collection");
 			},
 			Err(e) => {
-				tracing::error!(target: "runtime::asset-hub-westend", error=?e, "Failed to destroy undecodable NFT collection");
+				tracing::error!(target: "bridges::on_runtime_upgrade", error=?e, "Failed to destroy undecodable NFT collection");
 			},
 		};
 
@@ -2065,8 +2065,8 @@ pallet_revive::impl_runtime_apis_plus_revive!(
 						XCM_VERSION,
 					).map_err(|e| {
 						tracing::error!(
-							target: "runtime::asset-hub-westend", error=?e,
-							"Failed to dispatch `force_xcm_version({:?}, {:?}, {:?})`, error: {:?}",
+							target: "bridges::benchmark", error=?e,
+							"Failed to dispatch `force_xcm_version({:?}, {:?}, {:?})`",
 							RuntimeOrigin::root(),
 							bridged_asset_hub,
 							XCM_VERSION,
